@@ -54,6 +54,8 @@ BuildRequires:	gcc-c++
 BuildRequires:	boost-devel
 %if ! 0%{defined suse_version}
 BuildRequires:  bzip2-devel
+%else
+BuildRequires:  libbz2-devel
 %endif
 BuildRequires:	cryptsetup
 BuildRequires:	gdbm
