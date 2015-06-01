@@ -314,6 +314,88 @@ CEPH_HASH_NAMESPACE_START
   };
 CEPH_HASH_NAMESPACE_END
 
+struct file_layout_t {
+	uint32_t fl_stripe_unit;
+	uint32_t fl_stripe_count;
+	uint32_t fl_object_size;
+	uint32_t fl_pg_pool;
+	string fl_namespace;
+	file_layout_t() :
+		fl_stripe_unit(0),
+		fl_stripe_count(0),
+		fl_object_size(0),
+		fl_pg_pool(0),
+       		fl_namespace("")
+	{ }
+	file_layout_t(ceph_file_layout fl) :
+		fl_stripe_unit(fl.fl_stripe_unit),
+		fl_stripe_count(fl.fl_stripe_count),
+		fl_object_size(fl.fl_object_size),
+		fl_pg_pool(fl.fl_pg_pool),
+		fl_namespace("")
+	{ }
+	file_layout_t(const file_layout_t& fl) :
+		fl_stripe_unit(fl.fl_stripe_unit),
+		fl_stripe_count(fl.fl_stripe_count),
+		fl_object_size(fl.fl_object_size),
+		fl_pg_pool(fl.fl_pg_pool),
+		fl_namespace(fl.fl_namespace)
+	{ }
+	file_layout_t& operator=(const file_layout_t& fl)
+	{
+		fl_stripe_unit = fl.fl_stripe_unit;
+		fl_stripe_count = fl.fl_stripe_count;
+		fl_object_size = fl.fl_object_size;
+		fl_pg_pool = fl.fl_pg_pool;
+		fl_namespace = fl.fl_namespace;
+		return *this;
+	}
+	file_layout_t& operator=(const ceph_file_layout& fl)
+	{
+		fl_stripe_unit = fl.fl_stripe_unit;
+		fl_stripe_count = fl.fl_stripe_count;
+		fl_object_size = fl.fl_object_size;
+		fl_pg_pool = fl.fl_pg_pool;
+		fl_namespace = "";
+		return *this;
+	}
+	file_layout_t(unsigned int su, unsigned int sc, unsigned int os,
+			unsigned int pgp, const char *ns):
+		fl_stripe_unit(su),
+		fl_stripe_count(sc),
+		fl_object_size(os),
+		fl_pg_pool(pgp),
+		fl_namespace(ns)
+	{ }
+	void encode(bufferlist &bl) const {
+	  ENCODE_START(1, 1, bl);
+	  ::encode(fl_stripe_unit, bl);
+	  ::encode(fl_stripe_count, bl);
+	  ::encode(fl_object_size, bl);
+	  ::encode(fl_pg_pool, bl);
+	  ::encode(fl_namespace, bl);
+	  ENCODE_FINISH(bl);
+	}
+
+	void decode(bufferlist::iterator &p) {
+	  DECODE_START(1, p);
+	  ::decode(fl_stripe_unit, p);
+	  ::decode(fl_stripe_count, p);
+	  ::decode(fl_object_size, p);
+	  ::decode(fl_pg_pool, p);
+	  ::decode(fl_namespace, p);
+	  DECODE_FINISH(p);
+	}
+} __attribute__ ((__may_alias__));
+WRITE_CLASS_ENCODER(file_layout_t)
+
+inline ostream& operator<<(ostream& out, file_layout_t fl) {
+  return out << "stripe unit: " << fl.fl_stripe_unit <<
+	  " stripe count: " <<  fl.fl_stripe_count <<
+	  " object size: " << fl.fl_object_size <<
+	  " fl_pg_pool: " << fl.fl_pg_pool <<
+	  " namespace: " << fl.fl_namespace;
+}
 
 // file modes
 
@@ -330,6 +412,7 @@ namespace ceph {
   class Formatter;
 }
 void dump(const ceph_file_layout& l, ceph::Formatter *f);
+void dump(const file_layout_t& l, ceph::Formatter *f);
 void dump(const ceph_dir_layout& l, ceph::Formatter *f);
 
 
