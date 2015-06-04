@@ -397,6 +397,8 @@ inline ostream& operator<<(ostream& out, file_layout_t fl) {
 	  " namespace: " << fl.fl_namespace;
 }
 
+struct ceph_file_layout file_layout_legacy(const file_layout_t& fl);
+
 // file modes
 
 static inline bool file_mode_is_readonly(int mode) {

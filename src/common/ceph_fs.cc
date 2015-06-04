@@ -77,3 +77,16 @@ int ceph_caps_for_mode(int mode)
 
 	return caps;
 }
+
+struct ceph_file_layout file_layout_legacy(const file_layout_t& fl)
+{
+	struct ceph_file_layout old_fl;
+	old_fl.fl_stripe_unit = fl.fl_stripe_unit;
+	old_fl.fl_stripe_count = fl.fl_stripe_count;
+	old_fl.fl_object_size = fl.fl_object_size;
+	old_fl.fl_cas_hash = 0;
+	old_fl.fl_object_stripe_unit = 0;
+	old_fl.fl_unused = 0;
+	old_fl.fl_pg_pool = fl.fl_pg_pool;
+	return old_fl;
+}
