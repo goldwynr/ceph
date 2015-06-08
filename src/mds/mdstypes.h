@@ -383,7 +383,7 @@ struct inode_t {
 
   // file (data access)
   ceph_dir_layout  dir_layout;    // [dir only]
-  ceph_file_layout layout;
+  file_layout_t layout;
   vector <int64_t> old_pools;
   uint64_t   size;        // on directory, # dentries
   uint64_t   max_size_ever; // max size the file has ever been

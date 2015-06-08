@@ -99,7 +99,7 @@ struct InodeStat {
   version_t version;
   ceph_mds_reply_cap cap;
 
-  ceph_file_layout layout;
+  file_layout_t layout;
   unsigned mode, uid, gid, nlink, rdev;
   loff_t size, max_size;
   version_t truncate_seq;

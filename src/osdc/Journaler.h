@@ -118,7 +118,7 @@ public:
     uint64_t unused_field;
     uint64_t write_pos;
     string magic;
-    ceph_file_layout layout; //< The mapping from byte stream offsets to RADOS objects
+    file_layout_t layout; //< The mapping from byte stream offsets to RADOS objects
     stream_format_t stream_format; //< The encoding of LogEvents within the journal byte stream
 
     Header(const char *m="") :
@@ -207,7 +207,7 @@ private:
   inodeno_t ino;
   int64_t pg_pool;
   bool readonly;
-  ceph_file_layout layout;
+  file_layout_t layout;
   uint32_t stream_format;
   JournalStream journal_stream;
 
@@ -265,7 +265,7 @@ private:
   friend class C_WriteHead;
 
   void _reread_head(Context *onfinish);
-  void _set_layout(ceph_file_layout const *l);
+  void _set_layout(file_layout_t const *l);
   list<Context*> waitfor_recover;
   void _read_head(Context *on_finish, bufferlist *bl);
   void _finish_read_head(int r, bufferlist& bl);
@@ -422,7 +422,7 @@ public:
   // Asynchronous operations
   // =======================
   void erase(Context *completion);
-  void create(ceph_file_layout *layout, stream_format_t const sf);
+  void create(file_layout_t *layout, stream_format_t const sf);
   void recover(Context *onfinish);
   void reread_head(Context *onfinish);
   void reread_head_and_probe(Context *onfinish);
@@ -433,7 +433,7 @@ public:
 
   // Synchronous setters
   // ===================
-  void set_layout(ceph_file_layout const *l);
+  void set_layout(file_layout_t const *l);
   void set_readonly();
   void set_writeable();
   void set_write_pos(int64_t p) { 
@@ -470,7 +470,7 @@ public:
   // ===================
   // TODO: need some locks on reads for true safety
   uint64_t get_layout_period() const { return (uint64_t)layout.fl_stripe_count * (uint64_t)layout.fl_object_size; }
-  ceph_file_layout& get_layout() { return layout; }
+  file_layout_t& get_layout() { return layout; }
   bool is_active() { return state == STATE_ACTIVE; }
   int get_error() { return error; }
   bool is_readonly() { return readonly; }

@@ -596,14 +596,14 @@ public:
     return pg;
   }
 
-  static object_locator_t file_to_object_locator(const ceph_file_layout& layout) {
+  static object_locator_t file_to_object_locator(const file_layout_t& layout) {
     return object_locator_t(layout.fl_pg_pool);
   }
 
   // XXX: not used, mentioned in psim.cc comment
   // oid -> pg
-  ceph_object_layout file_to_object_layout(object_t oid, ceph_file_layout& layout, string nspace) const {
-    return make_object_layout(oid, layout.fl_pg_pool, nspace);
+  ceph_object_layout file_to_object_layout(object_t oid, file_layout_t& layout) const {
+    return make_object_layout(oid, layout.fl_pg_pool, layout.fl_namespace);
   }
 
   ceph_object_layout make_object_layout(object_t oid, int pg_pool, string nspace) const;

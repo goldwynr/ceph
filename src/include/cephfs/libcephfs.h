@@ -68,7 +68,6 @@ struct ceph_file_layout {
 	uint32_t fl_pg_pool;      /* namespace, crush ruleset, rep level */
 } __attribute__ ((packed));
 
-
 typedef struct _inodeno_t {
   uint64_t val;
 } inodeno_t;
@@ -87,6 +86,7 @@ typedef struct Fh Fh;
 #endif /* ! __cplusplus */
 
 struct inodeno_t;
+struct file_layout_t;
 struct Inode;
 typedef struct Inode Inode;
 
@@ -1356,13 +1356,13 @@ uint32_t ceph_ll_stripe_unit(struct ceph_mount_info *cmount,
 			     struct Inode *in);
 uint32_t ceph_ll_file_layout(struct ceph_mount_info *cmount,
 			     struct Inode *in,
-			     struct ceph_file_layout *layout);
+			     struct file_layout_t *layout);
 uint64_t ceph_ll_snap_seq(struct ceph_mount_info *cmount,
 			  struct Inode *in);
 int ceph_ll_get_stripe_osd(struct ceph_mount_info *cmount,
 			   struct Inode *in,
 			   uint64_t blockno,
-			   struct ceph_file_layout* layout);
+			   struct file_layout_t* layout);
 int ceph_ll_num_osds(struct ceph_mount_info *cmount);
 int ceph_ll_osdaddr(struct ceph_mount_info *cmount,
 		    int osd, uint32_t *addr);
@@ -1371,11 +1371,11 @@ uint64_t ceph_ll_get_internal_offset(struct ceph_mount_info *cmount,
 int ceph_ll_read_block(struct ceph_mount_info *cmount,
 		       struct Inode *in, uint64_t blockid,
 		       char* bl, uint64_t offset, uint64_t length,
-		       struct ceph_file_layout* layout);
+		       struct file_layout_t* layout);
 int ceph_ll_write_block(struct ceph_mount_info *cmount,
 			struct Inode *in, uint64_t blockid,
 			char* buf, uint64_t offset,
-			uint64_t length, struct ceph_file_layout* layout,
+			uint64_t length, struct file_layout_t* layout,
 			uint64_t snapseq, uint32_t sync);
 int ceph_ll_commit_blocks(struct ceph_mount_info *cmount,
 			  struct Inode *in, uint64_t offset, uint64_t range);

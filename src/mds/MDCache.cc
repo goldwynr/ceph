@@ -99,7 +99,7 @@
 
 using namespace std;
 
-extern struct ceph_file_layout g_default_file_layout;
+extern struct file_layout_t g_default_file_layout;
 
 #include "common/config.h"
 #include "include/assert.h"

@@ -483,7 +483,7 @@ static void fuse_ll_ioctl(fuse_req_t req, fuse_ino_t ino, int cmd, void *arg, st
 
   switch(cmd) {
     case CEPH_IOC_GET_LAYOUT: {
-      struct ceph_file_layout layout;
+      struct file_layout_t layout;
       struct ceph_ioctl_layout l;
       Fh *fh = (Fh*)fi->fh;
       cfuse->client->ll_file_layout(fh->inode, &layout);

@@ -73,6 +73,25 @@ using namespace std;
 #undef dout_prefix
 #define dout_prefix *_dout << "mds." << mds->get_nodeid() << ".server "
 
+static int file_layout_is_valid(const struct file_layout_t *layout)
+{
+	__u32 su = layout->fl_stripe_unit;
+	__u32 sc = layout->fl_stripe_count;
+	__u32 os = layout->fl_object_size;
+
+	/* stripe unit, object size must be non-zero, 64k increment */
+	if (!su || (su & (CEPH_MIN_STRIPE_UNIT-1)))
+		return 0;
+	if (!os || (os & (CEPH_MIN_STRIPE_UNIT-1)))
+		return 0;
+	/* object size must be a multiple of stripe unit */
+	if (os < su || os % su)
+		return 0;
+	/* stripe count must be non-zero */
+	if (!sc)
+		return 0;
+	return 1;
+}
 
 class ServerContext : public MDSInternalContextBase {
   protected:
@@ -2129,7 +2148,7 @@ CDentry* Server::prepare_stray_dentry(MDRequestRef& mdr, CInode *in)
  * create a new inode.  set c/m/atime.  hit dir pop.
  */
 CInode* Server::prepare_new_inode(MDRequestRef& mdr, CDir *dir, inodeno_t useino, unsigned mode,
-				  ceph_file_layout *layout) 
+				  file_layout_t *layout) 
 {
   CInode *in = new CInode(mdcache);
   
@@ -2313,7 +2332,7 @@ CInode* Server::rdlock_path_pin_ref(MDRequestRef& mdr, int n,
 				    bool want_auth,
 				    bool no_want_auth, /* for readdir, who doesn't want auth _even_if_ it's
 							  a snapped dir */
-				    ceph_file_layout **layout,
+				    file_layout_t **layout,
 				    bool no_lookup)    // true if we cannot return a null dentry lease
 {
   const filepath& refpath = n ? mdr->get_filepath2() : mdr->get_filepath();
@@ -2408,7 +2427,7 @@ CInode* Server::rdlock_path_pin_ref(MDRequestRef& mdr, int n,
 CDentry* Server::rdlock_path_xlock_dentry(MDRequestRef& mdr, int n,
 					  set<SimpleLock*>& rdlocks, set<SimpleLock*>& wrlocks, set<SimpleLock*>& xlocks,
 					  bool okexist, bool mustexist, bool alwaysxlock,
-					  ceph_file_layout **layout)
+					  file_layout_t **layout)
 {
   const filepath& refpath = n ? mdr->get_filepath2() : mdr->get_filepath();
 
@@ -2925,7 +2944,7 @@ void Server::handle_client_openc(MDRequestRef& mdr)
 
   bool excl = (req->head.args.open.flags & O_EXCL);
   set<SimpleLock*> rdlocks, wrlocks, xlocks;
-  ceph_file_layout *dir_layout = NULL;
+  file_layout_t *dir_layout = NULL;
   CDentry *dn = rdlock_path_xlock_dentry(mdr, 0, rdlocks, wrlocks, xlocks,
                                          !excl, false, false, &dir_layout);
   if (!dn) return;
@@ -2934,7 +2953,7 @@ void Server::handle_client_openc(MDRequestRef& mdr)
     return;
   }
   // set layout
-  ceph_file_layout layout;
+  file_layout_t layout;
   if (dir_layout)
     layout = *dir_layout;
   else
@@ -2958,7 +2977,7 @@ void Server::handle_client_openc(MDRequestRef& mdr)
     }
   }
 
-  if (!ceph_file_layout_is_valid(&layout)) {
+  if (!file_layout_is_valid(&layout)) {
     dout(10) << " invalid initial file layout" << dendl;
     respond_to_request(mdr, -EINVAL);
     return;
@@ -3646,7 +3665,7 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
   }
 
   // validate layout
-  ceph_file_layout layout = cur->get_projected_inode()->layout;
+  file_layout_t layout = cur->get_projected_inode()->layout;
   // save existing layout for later
   int64_t old_pool = layout.fl_pg_pool;
 
@@ -3656,10 +3675,6 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
     layout.fl_stripe_unit = req->head.args.setlayout.layout.fl_stripe_unit;
   if (req->head.args.setlayout.layout.fl_stripe_count > 0)
     layout.fl_stripe_count=req->head.args.setlayout.layout.fl_stripe_count;
-  if (req->head.args.setlayout.layout.fl_cas_hash > 0)
-    layout.fl_cas_hash = req->head.args.setlayout.layout.fl_cas_hash;
-  if (req->head.args.setlayout.layout.fl_object_stripe_unit > 0)
-    layout.fl_object_stripe_unit = req->head.args.setlayout.layout.fl_object_stripe_unit;
   if (req->head.args.setlayout.layout.fl_pg_pool > 0) {
     layout.fl_pg_pool = req->head.args.setlayout.layout.fl_pg_pool;
 
@@ -3669,7 +3684,7 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
       return;
     }
   }
-  if (!ceph_file_layout_is_valid(&layout)) {
+  if (!file_layout_is_valid(&layout)) {
     dout(10) << "bad layout" << dendl;
     respond_to_request(mdr, -EINVAL);
     return;
@@ -3707,7 +3722,7 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
 {
   MClientRequest *req = mdr->client_request;
   set<SimpleLock*> rdlocks, wrlocks, xlocks;
-  ceph_file_layout *dir_layout = NULL;
+  file_layout_t *dir_layout = NULL;
   CInode *cur = rdlock_path_pin_ref(mdr, 0, rdlocks, true, false, &dir_layout);
   if (!cur) return;
 
@@ -3727,7 +3742,7 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
 
   // validate layout
   const inode_t *old_pi = cur->get_projected_inode();
-  ceph_file_layout layout;
+  file_layout_t layout;
   if (old_pi->has_layout())
     layout = old_pi->layout;
   else if (dir_layout)
@@ -3741,10 +3756,6 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
     layout.fl_stripe_unit = req->head.args.setlayout.layout.fl_stripe_unit;
   if (req->head.args.setlayout.layout.fl_stripe_count > 0)
     layout.fl_stripe_count=req->head.args.setlayout.layout.fl_stripe_count;
-  if (req->head.args.setlayout.layout.fl_cas_hash > 0)
-    layout.fl_cas_hash = req->head.args.setlayout.layout.fl_cas_hash;
-  if (req->head.args.setlayout.layout.fl_object_stripe_unit > 0)
-    layout.fl_object_stripe_unit = req->head.args.setlayout.layout.fl_object_stripe_unit;
   if (req->head.args.setlayout.layout.fl_pg_pool > 0) {
     layout.fl_pg_pool = req->head.args.setlayout.layout.fl_pg_pool;
     // make sure we have as new a map as the client
@@ -3753,7 +3764,7 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
       return;
     }  
   }
-  if (!ceph_file_layout_is_valid(&layout)) {
+  if (!file_layout_is_valid(&layout)) {
     dout(10) << "bad layout" << dendl;
     respond_to_request(mdr, -EINVAL);
     return;
@@ -3805,7 +3816,7 @@ struct keys_and_values
 };
 
 int Server::parse_layout_vxattr(string name, string value, const OSDMap *osdmap,
-				ceph_file_layout *layout)
+				file_layout_t *layout)
 {
   dout(20) << "parse_layout_vxattr name " << name << " value '" << value << "'" << dendl;
   try {
@@ -3852,7 +3863,7 @@ int Server::parse_layout_vxattr(string name, string value, const OSDMap *osdmap,
     return -EINVAL;
   }
 
-  if (!ceph_file_layout_is_valid(layout)) {
+  if (!file_layout_is_valid(layout)) {
     dout(10) << "bad layout" << dendl;
     return -EINVAL;
   }
@@ -3911,7 +3922,7 @@ int Server::parse_quota_vxattr(string name, string value, quota_info_t *quota)
 }
 
 void Server::handle_set_vxattr(MDRequestRef& mdr, CInode *cur,
-			       ceph_file_layout *dir_layout,
+			       file_layout_t *dir_layout,
 			       set<SimpleLock*> rdlocks,
 			       set<SimpleLock*> wrlocks,
 			       set<SimpleLock*> xlocks)
@@ -3934,7 +3945,7 @@ void Server::handle_set_vxattr(MDRequestRef& mdr, CInode *cur,
 	return;
       }
 
-      ceph_file_layout layout;
+      file_layout_t layout;
       if (cur->get_projected_inode()->has_layout())
 	layout = cur->get_projected_inode()->layout;
       else if (dir_layout)
@@ -3979,7 +3990,7 @@ void Server::handle_set_vxattr(MDRequestRef& mdr, CInode *cur,
 	respond_to_request(mdr, -ENOTEMPTY);
 	return;
       }
-      ceph_file_layout layout = cur->get_projected_inode()->layout;
+      file_layout_t layout = cur->get_projected_inode()->layout;
       rest = name.substr(name.find("layout"));
       const OSDMap *osdmap = mds->objecter->get_osdmap_read();
       int r = parse_layout_vxattr(rest, value, osdmap, &layout);
@@ -4128,7 +4139,7 @@ void Server::handle_client_setxattr(MDRequestRef& mdr)
   set<SimpleLock*> rdlocks, wrlocks, xlocks;
   CInode *cur;
 
-  ceph_file_layout *dir_layout = NULL;
+  file_layout_t *dir_layout = NULL;
   if (name.find("ceph.dir.layout") == 0)
     cur = rdlock_path_pin_ref(mdr, 0, rdlocks, true, false, &dir_layout);
   else
@@ -4197,7 +4208,7 @@ void Server::handle_client_removexattr(MDRequestRef& mdr)
   MClientRequest *req = mdr->client_request;
   string name(req->get_path2());
   set<SimpleLock*> rdlocks, wrlocks, xlocks;
-  ceph_file_layout *dir_layout = NULL;
+  file_layout_t *dir_layout = NULL;
   CInode *cur;
   if (name == "ceph.dir.layout")
     cur = rdlock_path_pin_ref(mdr, 0, rdlocks, true, false, &dir_layout);
@@ -4309,7 +4320,7 @@ void Server::handle_client_mknod(MDRequestRef& mdr)
   MClientRequest *req = mdr->client_request;
   client_t client = mdr->get_client();
   set<SimpleLock*> rdlocks, wrlocks, xlocks;
-  ceph_file_layout *dir_layout = NULL;
+  file_layout_t *dir_layout = NULL;
   CDentry *dn = rdlock_path_xlock_dentry(mdr, 0, rdlocks, wrlocks, xlocks, false, false, false,
 					 &dir_layout);
   if (!dn) return;
@@ -4327,7 +4338,7 @@ void Server::handle_client_mknod(MDRequestRef& mdr)
     mode |= S_IFREG;
 
   // set layout
-  ceph_file_layout layout;
+  file_layout_t layout;
   if (dir_layout && S_ISREG(mode))
     layout = *dir_layout;
   else

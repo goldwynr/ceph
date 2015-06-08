@@ -106,7 +106,7 @@
 #define RADOS_OBJECT_EXTENSION_FORMAT ".%016llx"
 
 /// default object layout (external declaration)
-extern ceph_file_layout g_default_file_layout;
+extern file_layout_t g_default_file_layout;
 
 ///////////////////////// CompletionData /////////////////////////////
 
@@ -291,7 +291,7 @@ int libradosstriper::RadosStriperImpl::write(const std::string& soid,
 {
   // open the object. This will create it if needed, retrieve its layout
   // and size and take a shared lock on it
-  ceph_file_layout layout;
+  file_layout_t layout;
   std::string lockCookie;
   int rc = createAndOpenStripedObject(soid, &layout, len+off, &lockCookie, true);
   if (rc) return rc;
@@ -304,7 +304,7 @@ int libradosstriper::RadosStriperImpl::append(const std::string& soid,
 {
   // open the object. This will create it if needed, retrieve its layout
   // and size and take a shared lock on it
-  ceph_file_layout layout;
+  file_layout_t layout;
   uint64_t size = len;
   std::string lockCookie;
   int rc = openStripedObjectForWrite(soid, &layout, &size, &lockCookie, false);
@@ -347,7 +347,7 @@ int libradosstriper::RadosStriperImpl::aio_write(const std::string& soid,
 						 size_t len,
 						 uint64_t off)
 {
-  ceph_file_layout layout;
+  file_layout_t layout;
   std::string lockCookie;
   int rc = createAndOpenStripedObject(soid, &layout, len+off, &lockCookie, true);
   if (rc) return rc;
@@ -359,7 +359,7 @@ int libradosstriper::RadosStriperImpl::aio_append(const std::string& soid,
 						  const bufferlist& bl,
 						  size_t len)
 {
-  ceph_file_layout layout;
+  file_layout_t layout;
   uint64_t size = len;
   std::string lockCookie;
   int rc = openStripedObjectForWrite(soid, &layout, &size, &lockCookie, false);
@@ -441,7 +441,7 @@ int libradosstriper::RadosStriperImpl::aio_read(const std::string& soid,
 {
   // open the object. This will retrieve its layout and size
   // and take a shared lock on it
-  ceph_file_layout layout;
+  file_layout_t layout;
   uint64_t size;
   std::string lockCookie;
   int rc = openStripedObjectForRead(soid, &layout, &size, &lockCookie);
@@ -614,7 +614,7 @@ int libradosstriper::RadosStriperImpl::trunc(const std::string& soid, uint64_t s
   try {
     RadosExclusiveLock lock(&m_ioCtx, firstObjOid);
     // load layout and size
-    ceph_file_layout layout;
+    file_layout_t layout;
     uint64_t original_size;
     int rc = internal_get_layout_and_size(firstObjOid, &layout, &original_size);
     if (rc) return rc;
@@ -664,7 +664,7 @@ static void striper_write_req_complete(rados_striper_multi_completion_t c, void 
 }
 
 int libradosstriper::RadosStriperImpl::write_in_open_object(const std::string& soid,
-							    const ceph_file_layout& layout,
+							    const file_layout_t& layout,
 							    const std::string& lockCookie,
 							    const bufferlist& bl,
 							    size_t len,
@@ -711,7 +711,7 @@ static void striper_write_aio_req_safe(rados_striper_multi_completion_t c, void 
 
 int libradosstriper::RadosStriperImpl::aio_write_in_open_object(const std::string& soid,
 								librados::AioCompletionImpl *c,
-								const ceph_file_layout& layout,
+								const file_layout_t& layout,
 								const std::string& lockCookie,
 								const bufferlist& bl,
 								size_t len,
@@ -751,7 +751,7 @@ libradosstriper::RadosStriperImpl::internal_aio_write(const std::string& soid,
 						      const bufferlist& bl,
 						      size_t len,
 						      uint64_t off,
-						      const ceph_file_layout& layout)
+						      const file_layout_t& layout)
 {
   // get list of extents to be written to
   vector<ObjectExtent> extents;
@@ -785,7 +785,7 @@ libradosstriper::RadosStriperImpl::internal_aio_write(const std::string& soid,
 int libradosstriper::RadosStriperImpl::extract_uint32_attr
 (std::map<std::string, bufferlist> &attrs,
  const std::string& key,
- ceph_le32 *value)
+ uint32_t *value)
 {
   std::map<std::string, bufferlist>::iterator attrsIt = attrs.find(key);
   if (attrsIt != attrs.end()) {
@@ -825,7 +825,7 @@ int libradosstriper::RadosStriperImpl::extract_sizet_attr
 }
 
 int libradosstriper::RadosStriperImpl::internal_get_layout_and_size(const std::string& oid,
-								    ceph_file_layout *layout,
+								    file_layout_t *layout,
 								    uint64_t *size) 
 {
   // get external attributes of the first rados object
@@ -849,7 +849,7 @@ int libradosstriper::RadosStriperImpl::internal_get_layout_and_size(const std::s
 }
 
 int libradosstriper::RadosStriperImpl::openStripedObjectForRead(const std::string& soid,
-								ceph_file_layout *layout,
+								file_layout_t *layout,
 								uint64_t *size,
 								std::string *lockCookie)
 {
@@ -877,7 +877,7 @@ int libradosstriper::RadosStriperImpl::openStripedObjectForRead(const std::strin
 }
 
 int libradosstriper::RadosStriperImpl::openStripedObjectForWrite(const std::string& soid,
-								 ceph_file_layout *layout,
+								 file_layout_t *layout,
 								 uint64_t *size,
 								 std::string *lockCookie,
 								 bool isFileSizeAbsolute)
@@ -938,7 +938,7 @@ int libradosstriper::RadosStriperImpl::openStripedObjectForWrite(const std::stri
 }
 
 int libradosstriper::RadosStriperImpl::createAndOpenStripedObject(const std::string& soid,
-								  ceph_file_layout *layout,
+								  file_layout_t *layout,
 								  uint64_t size,
 								  std::string *lockCookie,
 								  bool isFileSizeAbsolute)
@@ -983,7 +983,7 @@ int libradosstriper::RadosStriperImpl::createAndOpenStripedObject(const std::str
 int libradosstriper::RadosStriperImpl::truncate(const std::string& soid,
 						uint64_t original_size,
 						uint64_t size,
-						ceph_file_layout &layout) 
+						file_layout_t &layout) 
 {
   // handle the underlying rados objects. 3 cases here :
   //  -- the objects belonging to object sets entirely located
@@ -1051,7 +1051,7 @@ int libradosstriper::RadosStriperImpl::truncate(const std::string& soid,
 int libradosstriper::RadosStriperImpl::grow(const std::string& soid,
 					    uint64_t original_size,
 					    uint64_t size,
-					    ceph_file_layout &layout) 
+					    file_layout_t &layout) 
 {
   // handle the underlying rados objects. As we support sparse objects,
   // we only have to change the size in the external attributes

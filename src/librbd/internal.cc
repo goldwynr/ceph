@@ -910,7 +910,7 @@ reprotect_and_return_err:
     ostringstream oss;
     CephContext *cct = (CephContext *)io_ctx.cct();
 
-    ceph_file_layout layout;
+    file_layout_t layout;
 
     id_obj = id_obj_name(imgname);
 

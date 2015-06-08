@@ -659,14 +659,14 @@ public:
   // file functions
 
   /*** async+caching (non-blocking) file interface ***/
-  int file_is_cached(ObjectSet *oset, ceph_file_layout *layout, snapid_t snapid,
+  int file_is_cached(ObjectSet *oset, file_layout_t *layout, snapid_t snapid,
 		     loff_t offset, uint64_t len) {
     vector<ObjectExtent> extents;
     Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, extents);
     return is_cached(oset, extents, snapid);
   }
 
-  int file_read(ObjectSet *oset, ceph_file_layout *layout, snapid_t snapid,
+  int file_read(ObjectSet *oset, file_layout_t *layout, snapid_t snapid,
                 loff_t offset, uint64_t len, 
                 bufferlist *bl,
 		int flags,
@@ -676,7 +676,7 @@ public:
     return readx(rd, oset, onfinish);
   }
 
-  int file_write(ObjectSet *oset, ceph_file_layout *layout, const SnapContext& snapc,
+  int file_write(ObjectSet *oset, file_layout_t *layout, const SnapContext& snapc,
                  loff_t offset, uint64_t len, 
                  bufferlist& bl, utime_t mtime, int flags,
 		 Mutex& wait_on_lock) {
@@ -685,7 +685,7 @@ public:
     return writex(wr, oset, wait_on_lock, NULL);
   }
 
-  bool file_flush(ObjectSet *oset, ceph_file_layout *layout, const SnapContext& snapc,
+  bool file_flush(ObjectSet *oset, file_layout_t *layout, const SnapContext& snapc,
                   loff_t offset, uint64_t len, Context *onfinish) {
     vector<ObjectExtent> extents;
     Striper::file_to_extents(cct, oset->ino, layout, offset, len, oset->truncate_size, extents);

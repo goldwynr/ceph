@@ -3030,9 +3030,9 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // file
   i = pfile ? pi:oi;
   if (is_dir()) {
-    e.layout = (ppolicy ? pi : oi)->layout;
+    e.layout = file_layout_legacy((ppolicy ? pi : oi)->layout);
   } else {
-    e.layout = i->layout;
+    e.layout = file_layout_legacy(i->layout);
   }
   e.size = i->size;
   e.truncate_seq = i->truncate_seq;
@@ -3247,7 +3247,7 @@ void CInode::encode_cap_message(MClientCaps *m, Capability *cap)
 	   << " ctime " << i->ctime << dendl;
 
   i = pfile ? pi:oi;
-  m->head.layout = i->layout;
+  m->head.layout = file_layout_legacy(i->layout);
   m->head.size = i->size;
   m->head.truncate_seq = i->truncate_seq;
   m->head.truncate_size = i->truncate_size;
