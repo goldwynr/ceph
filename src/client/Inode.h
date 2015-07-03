@@ -317,7 +317,6 @@ struct Inode {
       async_err(0)
   {
     memset(&dir_layout, 0, sizeof(dir_layout));
-    memset(&layout, 0, sizeof(layout));
     memset(&flushing_cap_tid, 0, sizeof(__u16)*CEPH_CAP_BITS);
     memset(&quota, 0, sizeof(quota));
   }

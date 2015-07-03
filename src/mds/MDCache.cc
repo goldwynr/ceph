@@ -212,8 +212,6 @@ MDCache::MDCache(MDS *m) :
 
   decayrate.set_halflife(g_conf->mds_decay_halflife);
 
-  memset(&default_log_layout, 0, sizeof(default_log_layout));
-
   did_shutdown_log_cap = false;
 }
 
@@ -353,7 +351,6 @@ void MDCache::create_unlinked_system_inode(CInode *in, inodeno_t ino,
 
   memset(&in->inode.dir_layout, 0, sizeof(in->inode.dir_layout));
   if (in->inode.is_dir()) {
-    memset(&in->inode.layout, 0, sizeof(in->inode.layout));
     in->inode.dir_layout.dl_dir_hash = g_conf->mds_default_dir_hash;
     ++in->inode.rstat.rsubdirs;
   } else {

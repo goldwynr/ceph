@@ -69,7 +69,6 @@ namespace librbd {
     data_ctx.dup(p);
 
     memset(&header, 0, sizeof(header));
-    memset(&layout, 0, sizeof(layout));
 
     string pname = string("librbd-") + id + string("-") +
       data_ctx.get_pool_name() + string("/") + name;
@@ -199,7 +198,6 @@ namespace librbd {
     alignments.push_back(stripe_unit); // stripe unit
     readahead.set_alignments(alignments);
 
-    memset(&layout, 0, sizeof(layout));
     layout.fl_stripe_unit = stripe_unit;
     layout.fl_stripe_count = stripe_count;
     layout.fl_object_size = 1ull << order;

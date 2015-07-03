@@ -455,7 +455,7 @@ struct inode_t {
   }
 
   void clear_layout() {
-    memset(&layout, 0, sizeof(layout));
+    layout = file_layout_t();
   }
 
   uint64_t get_layout_size_increment() {

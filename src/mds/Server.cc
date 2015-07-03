@@ -2193,7 +2193,7 @@ CInode* Server::prepare_new_inode(MDRequestRef& mdr, CDir *dir, inodeno_t useino
   memset(&in->inode.dir_layout, 0, sizeof(in->inode.dir_layout));
   if (in->inode.is_dir()) {
     in->inode.dir_layout.dl_dir_hash = g_conf->mds_default_dir_hash;
-    memset(&in->inode.layout, 0, sizeof(in->inode.layout));
+    in->inode.layout = file_layout_t();
   } else if (layout) {
     in->inode.layout = *layout;
   } else {

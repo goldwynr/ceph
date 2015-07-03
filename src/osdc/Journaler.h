@@ -123,7 +123,6 @@ public:
 
     Header(const char *m="") :
       trimmed_pos(0), expire_pos(0), unused_field(0), write_pos(0), magic(m), stream_format(-1) {
-      memset(&layout, 0, sizeof(layout));
     }
 
     void encode(bufferlist &bl) const {
@@ -387,7 +386,6 @@ public:
     on_readable(0), on_write_error(NULL), called_write_error(false),
     expire_pos(0), trimming_pos(0), trimmed_pos(0)
   {
-    memset(&layout, 0, sizeof(layout));
   }
 
   /* reset
