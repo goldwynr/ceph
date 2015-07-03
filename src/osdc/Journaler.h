@@ -126,7 +126,7 @@ public:
     }
 
     void encode(bufferlist &bl) const {
-      ENCODE_START(2, 2, bl);
+      ENCODE_START(3, 2, bl);
       ::encode(magic, bl);
       ::encode(trimmed_pos, bl);
       ::encode(expire_pos, bl);
@@ -137,13 +137,19 @@ public:
       ENCODE_FINISH(bl);
     }
     void decode(bufferlist::iterator &bl) {
-      DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
+      DECODE_START_LEGACY_COMPAT_LEN(3, 2, 2, bl);
       ::decode(magic, bl);
       ::decode(trimmed_pos, bl);
       ::decode(expire_pos, bl);
       ::decode(unused_field, bl);
       ::decode(write_pos, bl);
-      ::decode(layout, bl);
+      if (struct_v > 2) {
+        ::decode(layout, bl);
+      } else {
+	ceph_file_layout l;
+	::decode(l, bl);
+	layout = l;
+      }
       if (struct_v > 1) {
         ::decode(stream_format, bl);
       } else {
@@ -168,6 +174,7 @@ public:
 	  f->dump_unsigned("cas_hash", layout.fl_stripe_unit);
 	  f->dump_unsigned("object_stripe_unit", layout.fl_stripe_unit);
 	  f->dump_unsigned("pg_pool", layout.fl_stripe_unit);
+	  f->dump_string("namespace", layout.fl_namespace);
 	}
 	f->close_section(); // layout
       }
