@@ -245,7 +245,7 @@ ostream& operator<<(ostream& out, const client_writeable_range_t& r)
  */
 void inode_t::encode(bufferlist &bl) const
 {
-  ENCODE_START(11, 6, bl);
+  ENCODE_START(12, 6, bl);
 
   ::encode(ino, bl);
   ::encode(rdev, bl);
@@ -294,7 +294,7 @@ void inode_t::encode(bufferlist &bl) const
 
 void inode_t::decode(bufferlist::iterator &p)
 {
-  DECODE_START_LEGACY_COMPAT_LEN(11, 6, 6, p);
+  DECODE_START_LEGACY_COMPAT_LEN(12, 6, 6, p);
 
   ::decode(ino, p);
   ::decode(rdev, p);
@@ -314,7 +314,13 @@ void inode_t::decode(bufferlist::iterator &p)
     ::decode(dir_layout, p);
   else
     memset(&dir_layout, 0, sizeof(dir_layout));
-  ::decode(layout, p);
+  if (struct_v >= 12)
+	  ::decode(layout, p);
+  else {
+	ceph_file_layout l;
+	::decode(l, p);
+	layout = l;
+  }
   ::decode(size, p);
   ::decode(truncate_seq, p);
   ::decode(truncate_size, p);
