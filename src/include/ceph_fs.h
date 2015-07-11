@@ -478,7 +478,7 @@ struct ceph_mds_reply_cap {
 #define CEPH_CAP_FLAG_RELEASE	(1 << 1)        /* ask client to release the cap */
 
 /* inode record, for bundling with mds reply */
-struct ceph_mds_reply_inode {
+struct ceph_mds_reply_inode_old {
 	__le64 ino;
 	__le64 snapid;
 	__le32 rdev;

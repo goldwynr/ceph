@@ -223,7 +223,9 @@ WRITE_RAW_ENCODER(ceph_mds_lease)
 WRITE_RAW_ENCODER(ceph_mds_snap_head)
 WRITE_RAW_ENCODER(ceph_mds_snap_realm)
 WRITE_RAW_ENCODER(ceph_mds_reply_head)
-WRITE_RAW_ENCODER(ceph_mds_reply_inode)
+WRITE_RAW_ENCODER(ceph_mds_reply_cap)
+WRITE_RAW_ENCODER(ceph_frag_tree_head)
+WRITE_RAW_ENCODER(ceph_timespec)
 WRITE_RAW_ENCODER(ceph_mds_cap_reconnect)
 WRITE_RAW_ENCODER(ceph_mds_snaprealm_reconnect)
 WRITE_RAW_ENCODER(ceph_frag_tree_split)
@@ -398,6 +400,103 @@ inline ostream& operator<<(ostream& out, file_layout_t fl) {
 }
 
 struct ceph_file_layout file_layout_legacy(const file_layout_t& fl);
+
+/* From the legacy ceph_mds_reply_inode */
+struct ceph_mds_reply_inode {
+	uint64_t ino;
+	uint64_t snapid;
+	uint32_t rdev;
+	uint64_t version;                /* inode version */
+	uint64_t xattr_version;          /* version for xattr blob */
+	struct ceph_mds_reply_cap cap; /* caps issued for this inode */
+	struct file_layout_t layout;
+	struct ceph_timespec ctime, mtime, atime;
+	uint32_t time_warp_seq;
+	uint64_t size, max_size, truncate_size;
+	uint32_t truncate_seq;
+	uint32_t mode, uid, gid;
+	uint32_t nlink;
+	uint64_t files, subdirs, rbytes, rfiles, rsubdirs;  /* dir stats */
+	struct ceph_timespec rctime;
+	struct ceph_frag_tree_head fragtree;  /* (must be at end of struct) */
+	ceph_mds_reply_inode() : ino(0), snapid(0), rdev(0),
+				version(0), xattr_version(0),
+				time_warp_seq(0), size(0), max_size(0),
+				truncate_size(0), truncate_seq(0),
+				mode(0), uid(0), gid(0), nlink(0),
+				files(0), subdirs(0), rbytes(0), rfiles(0),
+				rsubdirs(0)
+	{
+		memset(&cap, 0, sizeof(struct ceph_mds_reply_cap));
+		memset(&ctime, 0, sizeof(struct ceph_timespec));
+		memset(&mtime, 0, sizeof(struct ceph_timespec));
+		memset(&atime, 0, sizeof(struct ceph_timespec));
+		memset(&rctime, 0, sizeof(struct ceph_timespec));
+		memset(&fragtree, 0, sizeof(struct ceph_frag_tree_head));
+	}
+	void encode(bufferlist &bl) const {
+	  ENCODE_START(1, 1, bl);
+	  ::encode(ino, bl);
+	  ::encode(snapid, bl);
+	  ::encode(rdev, bl);
+	  ::encode(version, bl);
+	  ::encode(xattr_version, bl);
+	  ::encode(cap, bl);
+	  ::encode(layout, bl);
+	  ::encode(ctime, bl);
+	  ::encode(mtime, bl);
+	  ::encode(atime, bl);
+	  ::encode(time_warp_seq, bl);
+	  ::encode(size, bl);
+	  ::encode(max_size, bl);
+	  ::encode(truncate_size, bl);
+	  ::encode(truncate_seq, bl);
+	  ::encode(mode, bl);
+	  ::encode(uid, bl);
+	  ::encode(gid, bl);
+	  ::encode(nlink, bl);
+	  ::encode(files, bl);
+	  ::encode(subdirs, bl);
+	  ::encode(rbytes, bl);
+	  ::encode(rfiles, bl);
+	  ::encode(rsubdirs, bl);
+	  ::encode(rctime, bl);
+	  ::encode(fragtree, bl);
+	  ENCODE_FINISH(bl);
+	}
+	void decode(bufferlist::iterator &p) {
+	  DECODE_START(1, p);
+	  ::decode(ino, p);
+	  ::decode(snapid, p);
+	  ::decode(rdev, p);
+	  ::decode(version, p);
+	  ::decode(xattr_version, p);
+	  ::decode(cap, p);
+	  ::decode(layout, p);
+	  ::decode(ctime, p);
+	  ::decode(mtime, p);
+	  ::decode(atime, p);
+	  ::decode(time_warp_seq, p);
+	  ::decode(size, p);
+	  ::decode(max_size, p);
+	  ::decode(truncate_size, p);
+	  ::decode(truncate_seq, p);
+	  ::decode(mode, p);
+	  ::decode(uid, p);
+	  ::decode(gid, p);
+	  ::decode(nlink, p);
+	  ::decode(files, p);
+	  ::decode(subdirs, p);
+	  ::decode(rbytes, p);
+	  ::decode(rfiles, p);
+	  ::decode(rsubdirs, p);
+	  ::decode(rctime, p);
+	  ::decode(fragtree, p);
+	  DECODE_FINISH(p);
+	}
+} __attribute__ ((__may_alias__));
+WRITE_CLASS_ENCODER(ceph_mds_reply_inode);
+
 
 // file modes
 

@@ -2999,8 +2999,7 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   /*
    * note: encoding matches struct ceph_client_reply_inode
    */
-  struct ceph_mds_reply_inode e;
-  memset(&e, 0, sizeof(e));
+  ceph_mds_reply_inode e = ceph_mds_reply_inode();
   e.ino = oi->ino;
   e.snapid = snapid;  // 0 -> NOSNAP
   e.rdev = oi->rdev;
@@ -3030,9 +3029,9 @@ int CInode::encode_inodestat(bufferlist& bl, Session *session,
   // file
   i = pfile ? pi:oi;
   if (is_dir()) {
-    e.layout = file_layout_legacy((ppolicy ? pi : oi)->layout);
+    e.layout = (ppolicy ? pi : oi)->layout;
   } else {
-    e.layout = file_layout_legacy(i->layout);
+    e.layout = i->layout;
   }
   e.size = i->size;
   e.truncate_seq = i->truncate_seq;
