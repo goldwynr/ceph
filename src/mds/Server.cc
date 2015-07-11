@@ -3854,6 +3854,8 @@ int Server::parse_layout_vxattr(string name, string value, const OSDMap *osdmap,
 	}
 	layout->fl_pg_pool = pool;
       }
+    } else if (name == "layout.namespace") {
+      layout->fl_namespace = value;
     } else {
       dout(10) << " unknown layout vxattr " << name << dendl;
       return -EINVAL;
