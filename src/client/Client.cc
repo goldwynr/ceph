@@ -2821,7 +2821,7 @@ void Client::send_cap(Inode *in, MetaSession *session, Cap *cap,
     m->head.xattr_version = in->xattr_version;
   }
   
-  m->head.layout = file_layout_legacy(in->layout);
+  m->head.layout = in->layout;
   m->head.size = in->size;
   m->head.max_size = in->max_size;
   m->head.truncate_seq = in->truncate_seq;

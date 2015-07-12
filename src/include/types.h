@@ -215,7 +215,6 @@ WRITE_RAW_ENCODER(ceph_mds_session_head)
 WRITE_RAW_ENCODER(ceph_mds_request_head)
 WRITE_RAW_ENCODER(ceph_mds_request_release)
 WRITE_RAW_ENCODER(ceph_filelock)
-WRITE_RAW_ENCODER(ceph_mds_caps)
 WRITE_RAW_ENCODER(ceph_mds_cap_peer)
 WRITE_RAW_ENCODER(ceph_mds_cap_release)
 WRITE_RAW_ENCODER(ceph_mds_cap_item)
@@ -497,6 +496,111 @@ struct ceph_mds_reply_inode {
 } __attribute__ ((__may_alias__));
 WRITE_CLASS_ENCODER(ceph_mds_reply_inode);
 
+struct ceph_mds_caps {
+        uint32_t op;                  /* CEPH_CAP_OP_* */
+        uint64_t ino, realm;
+        uint64_t cap_id;
+        uint32_t seq, issue_seq;
+        uint32_t caps, wanted, dirty; /* latest issued/wanted/dirty */
+        uint32_t migrate_seq;
+        uint64_t snap_follows;
+        uint32_t snap_trace_len;
+
+        /* authlock */
+        uint32_t uid, gid, mode;
+
+        /* linklock */
+        uint32_t nlink;
+
+        /* xattrlock */
+        uint32_t xattr_len;
+        uint64_t xattr_version;
+	/*all except export */
+	/* filelock */
+	uint64_t size, max_size, truncate_size;
+	uint32_t truncate_seq;
+	struct ceph_timespec mtime, atime, ctime;
+	struct file_layout_t layout;
+	uint32_t time_warp_seq;
+	/* export message */
+	struct ceph_mds_cap_peer peer;
+	void encode(bufferlist &bl) const {
+	  ENCODE_START(1, 1, bl);
+	  ::encode(op, bl);
+	  ::encode(ino, bl);
+	  ::encode(realm, bl);
+	  ::encode(cap_id, bl);
+	  ::encode(seq, bl);
+	  ::encode(issue_seq, bl);
+	  ::encode(caps, bl);
+	  ::encode(wanted, bl);
+	  ::encode(dirty, bl);
+	  ::encode(migrate_seq, bl);
+	  ::encode(snap_follows, bl);
+	  ::encode(snap_trace_len, bl);
+	  ::encode(uid, bl);
+	  ::encode(gid, bl);
+	  ::encode(mode, bl);
+	  ::encode(nlink, bl);
+	  ::encode(xattr_len, bl);
+	  ::encode(xattr_version, bl);
+	  switch(op) {
+		case CEPH_CAP_OP_EXPORT:
+			::encode(peer, bl);
+			break;
+		default:
+			::encode(size, bl);
+			::encode(max_size, bl);
+			::encode(truncate_size, bl);
+			::encode(truncate_seq, bl);
+			::encode(mtime, bl);
+			::encode(atime, bl);
+			::encode(ctime, bl);
+			::encode(layout, bl);
+			::encode(time_warp_seq, bl);
+	  };
+	  ENCODE_FINISH(bl);
+	};
+
+	void decode(bufferlist::iterator &p) {
+	  DECODE_START(1, p);
+	  ::decode(op, p);
+	  ::decode(ino, p);
+	  ::decode(realm, p);
+	  ::decode(cap_id, p);
+	  ::decode(seq, p);
+	  ::decode(issue_seq, p);
+	  ::decode(caps, p);
+	  ::decode(wanted, p);
+	  ::decode(dirty, p);
+	  ::decode(migrate_seq, p);
+	  ::decode(snap_follows, p);
+	  ::decode(snap_trace_len, p);
+	  ::decode(uid, p);
+	  ::decode(gid, p);
+	  ::decode(mode, p);
+	  ::decode(nlink, p);
+	  ::decode(xattr_len, p);
+	  ::decode(xattr_version, p);
+	  switch(op) {
+		case CEPH_CAP_OP_EXPORT:
+			::decode(peer, p);
+			break;
+		default:
+			::decode(size, p);
+			::decode(max_size, p);
+			::decode(truncate_size, p);
+			::decode(truncate_seq, p);
+			::decode(mtime, p);
+			::decode(atime, p);
+			::decode(ctime, p);
+			::decode(layout, p);
+			::decode(time_warp_seq, p);
+	  };
+	  DECODE_FINISH(p);
+	}
+} __attribute__ ((__may_alias__));
+WRITE_CLASS_ENCODER(ceph_mds_caps);
 
 // file modes
 

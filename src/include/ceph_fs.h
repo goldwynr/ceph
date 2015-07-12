@@ -664,7 +664,7 @@ struct ceph_mds_cap_peer {
 /*
  * caps message, used for capability callbacks, acks, requests, etc.
  */
-struct ceph_mds_caps {
+struct ceph_mds_caps_old {
 	__le32 op;                  /* CEPH_CAP_OP_* */
 	__le64 ino, realm;
 	__le64 cap_id;
