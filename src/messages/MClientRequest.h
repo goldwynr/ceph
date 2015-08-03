@@ -81,10 +81,9 @@ public:
  public:
   // cons
   MClientRequest()
-    : Message(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {}
+    : Message(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION), head() {}
   MClientRequest(int op)
-    : Message(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION) {
-    memset(&head, 0, sizeof(head));
+    : Message(CEPH_MSG_CLIENT_REQUEST, HEAD_VERSION, COMPAT_VERSION), head() {
     head.op = op;
   }
 private:

@@ -1906,7 +1906,7 @@ MClientRequest* Client::build_client_request(MetaRequest *request)
   MClientRequest *req = new MClientRequest(request->get_op());
   req->set_tid(request->tid);
   req->set_stamp(request->op_stamp);
-  memcpy(&req->head, &request->head, sizeof(ceph_mds_request_head));
+  req->head = request->head;
 
   // if the filepath's haven't been set, set them!
   if (request->path.empty()) {
@@ -8743,6 +8743,7 @@ size_t Client::_vxattrcb_layout(Inode *in, char *val, size_t size)
     r += snprintf(val + r, size - r, "%lld",
 	(unsigned long long)in->layout.fl_pg_pool);
   objecter->put_osdmap_read();
+  r += snprintf(val + r, size - r, " namespace=%s", in->layout.fl_namespace.c_str());
   return r;
 }
 size_t Client::_vxattrcb_layout_stripe_unit(Inode *in, char *val, size_t size)
@@ -8767,6 +8768,10 @@ size_t Client::_vxattrcb_layout_pool(Inode *in, char *val, size_t size)
     r = snprintf(val, size, "%lld", (unsigned long long)in->layout.fl_pg_pool);
   objecter->put_osdmap_read();
   return r;
+}
+size_t Client::_vxattrcb_layout_namespace(Inode *in, char *val, size_t size)
+{
+  return snprintf(val, size, "%s", in->layout.fl_namespace.c_str());
 }
 size_t Client::_vxattrcb_dir_entries(Inode *in, char *val, size_t size)
 {
@@ -8874,6 +8879,7 @@ const Client::VXattr Client::_file_vxattrs[] = {
   XATTR_LAYOUT_FIELD(file, layout, stripe_count),
   XATTR_LAYOUT_FIELD(file, layout, object_size),
   XATTR_LAYOUT_FIELD(file, layout, pool),
+  XATTR_LAYOUT_FIELD(file, layout, namespace),
   { name: "" }     /* Required table terminator */
 };
 

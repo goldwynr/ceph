@@ -406,9 +406,6 @@ union ceph_mds_request_args {
 		__le32 flags;
 	} __attribute__ ((packed)) setxattr;
 	struct {
-		struct ceph_file_layout layout;
-	} __attribute__ ((packed)) setlayout;
-	struct {
 		__u8 rule; /* currently fcntl or flock */
 		__u8 type; /* shared, exclusive, remove*/
 		__le64 owner; /* who requests/holds the lock */
@@ -422,7 +419,7 @@ union ceph_mds_request_args {
 #define CEPH_MDS_FLAG_REPLAY        1  /* this is a replayed op */
 #define CEPH_MDS_FLAG_WANT_DENTRY   2  /* want dentry in reply */
 
-struct ceph_mds_request_head {
+struct ceph_mds_request_head_old {
 	__le64 oldest_client_tid;
 	__le32 mdsmap_epoch;           /* on client */
 	__le32 flags;                  /* CEPH_MDS_FLAG_* */

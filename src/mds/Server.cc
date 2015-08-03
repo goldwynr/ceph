@@ -3669,14 +3669,14 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
   // save existing layout for later
   int64_t old_pool = layout.fl_pg_pool;
 
-  if (req->head.args.setlayout.layout.fl_object_size > 0)
-    layout.fl_object_size = req->head.args.setlayout.layout.fl_object_size;
-  if (req->head.args.setlayout.layout.fl_stripe_unit > 0)
-    layout.fl_stripe_unit = req->head.args.setlayout.layout.fl_stripe_unit;
-  if (req->head.args.setlayout.layout.fl_stripe_count > 0)
-    layout.fl_stripe_count=req->head.args.setlayout.layout.fl_stripe_count;
-  if (req->head.args.setlayout.layout.fl_pg_pool > 0) {
-    layout.fl_pg_pool = req->head.args.setlayout.layout.fl_pg_pool;
+  if (req->head.setlayout.fl_object_size > 0)
+    layout.fl_object_size = req->head.setlayout.fl_object_size;
+  if (req->head.setlayout.fl_stripe_unit > 0)
+    layout.fl_stripe_unit = req->head.setlayout.fl_stripe_unit;
+  if (req->head.setlayout.fl_stripe_count > 0)
+    layout.fl_stripe_count=req->head.setlayout.fl_stripe_count;
+  if (req->head.setlayout.fl_pg_pool > 0) {
+    layout.fl_pg_pool = req->head.setlayout.fl_pg_pool;
 
     // make sure we have as new a map as the client
     if (req->get_mdsmap_epoch() > mds->mdsmap->get_epoch()) {
@@ -3684,6 +3684,9 @@ void Server::handle_client_setlayout(MDRequestRef& mdr)
       return;
     }
   }
+  if (req->head.setlayout.fl_namespace.size())
+	  layout.fl_namespace = req->head.setlayout.fl_namespace;
+
   if (!file_layout_is_valid(&layout)) {
     dout(10) << "bad layout" << dendl;
     respond_to_request(mdr, -EINVAL);
@@ -3750,20 +3753,22 @@ void Server::handle_client_setdirlayout(MDRequestRef& mdr)
   else
     layout = mds->mdcache->default_file_layout;
 
-  if (req->head.args.setlayout.layout.fl_object_size > 0)
-    layout.fl_object_size = req->head.args.setlayout.layout.fl_object_size;
-  if (req->head.args.setlayout.layout.fl_stripe_unit > 0)
-    layout.fl_stripe_unit = req->head.args.setlayout.layout.fl_stripe_unit;
-  if (req->head.args.setlayout.layout.fl_stripe_count > 0)
-    layout.fl_stripe_count=req->head.args.setlayout.layout.fl_stripe_count;
-  if (req->head.args.setlayout.layout.fl_pg_pool > 0) {
-    layout.fl_pg_pool = req->head.args.setlayout.layout.fl_pg_pool;
+  if (req->head.setlayout.fl_object_size > 0)
+    layout.fl_object_size = req->head.setlayout.fl_object_size;
+  if (req->head.setlayout.fl_stripe_unit > 0)
+    layout.fl_stripe_unit = req->head.setlayout.fl_stripe_unit;
+  if (req->head.setlayout.fl_stripe_count > 0)
+    layout.fl_stripe_count=req->head.setlayout.fl_stripe_count;
+  if (req->head.setlayout.fl_pg_pool > 0) {
+    layout.fl_pg_pool = req->head.setlayout.fl_pg_pool;
     // make sure we have as new a map as the client
     if (req->get_mdsmap_epoch() > mds->mdsmap->get_epoch()) {
       mds->wait_for_mdsmap(req->get_mdsmap_epoch(), new C_MDS_RetryRequest(mdcache, mdr));
       return;
     }  
   }
+  if (req->head.setlayout.fl_namespace.size())
+    layout.fl_namespace = req->head.setlayout.fl_namespace;
   if (!file_layout_is_valid(&layout)) {
     dout(10) << "bad layout" << dendl;
     respond_to_request(mdr, -EINVAL);

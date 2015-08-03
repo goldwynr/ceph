@@ -81,7 +81,7 @@ public:
   MetaRequest(int op) :
     _inode(NULL), _old_inode(NULL), _other_inode(NULL),
     _dentry(NULL), _old_dentry(NULL),
-    tid(0),
+    tid(0), head(),
     inode_drop(0), inode_unless(0),
     old_inode_drop(0), old_inode_unless(0),
     dentry_drop(0), dentry_unless(0),
@@ -97,7 +97,6 @@ public:
     lock("MetaRequest lock"),
     caller_cond(0), dispatch_cond(0),
     target(0) {
-    memset(&head, 0, sizeof(ceph_mds_request_head));
     head.op = op;
   }
   ~MetaRequest();

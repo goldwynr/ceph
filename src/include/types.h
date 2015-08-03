@@ -212,7 +212,7 @@ WRITE_RAW_ENCODER(ceph_fsid)
 WRITE_RAW_ENCODER(ceph_file_layout)
 WRITE_RAW_ENCODER(ceph_dir_layout)
 WRITE_RAW_ENCODER(ceph_mds_session_head)
-WRITE_RAW_ENCODER(ceph_mds_request_head)
+WRITE_RAW_ENCODER(ceph_mds_request_args)
 WRITE_RAW_ENCODER(ceph_mds_request_release)
 WRITE_RAW_ENCODER(ceph_filelock)
 WRITE_RAW_ENCODER(ceph_mds_cap_peer)
@@ -601,6 +601,65 @@ struct ceph_mds_caps {
 	}
 } __attribute__ ((__may_alias__));
 WRITE_CLASS_ENCODER(ceph_mds_caps);
+
+struct ceph_mds_request_head {
+        uint64_t oldest_client_tid;
+        uint32_t mdsmap_epoch;           /* on client */
+        uint32_t flags;                  /* CEPH_MDS_FLAG_* */
+        __u8 num_retry, num_fwd;       /* count retry, fwd attempts */
+        uint16_t num_releases;         /* # include cap/lease release records */
+        uint32_t op;                     /* mds op code */
+        uint32_t caller_uid, caller_gid;
+        uint64_t ino;                    /* use this ino for openc, mkdir, mknod,
+                                          etc. (if replaying) */
+	file_layout_t setlayout;
+        union ceph_mds_request_args args;
+
+	void encode(bufferlist &bl) const {
+	  ENCODE_START(1, 1, bl);
+	  ::encode(oldest_client_tid, bl);
+	  ::encode(mdsmap_epoch, bl);
+	  ::encode(flags, bl);
+	  ::encode(num_retry, bl);
+	  ::encode(num_fwd, bl);
+	  ::encode(num_releases, bl);
+	  ::encode(op, bl);
+	  ::encode(caller_uid, bl);
+	  ::encode(caller_gid, bl);
+	  ::encode(ino, bl);
+	  switch (op) {
+		case CEPH_MDS_OP_SETLAYOUT:
+			::encode(setlayout, bl);
+			break;
+		default:
+			::encode(args, bl);
+		}
+	  ENCODE_FINISH(bl);
+	};
+	void decode(bufferlist::iterator &p) {
+	  DECODE_START(1, p);
+	  ::decode(oldest_client_tid, p);
+	  ::decode(mdsmap_epoch, p);
+	  ::decode(flags, p);
+	  ::decode(num_retry, p);
+	  ::decode(num_fwd, p);
+	  ::decode(num_releases, p);
+	  ::decode(op, p);
+	  ::decode(caller_uid, p);
+	  ::decode(caller_gid, p);
+	  ::decode(ino, p);
+	  switch (op) {
+		case CEPH_MDS_OP_SETLAYOUT:
+			::decode(setlayout, p);
+			break;
+		default:
+			::decode(args, p);
+		}
+	  DECODE_FINISH(p);
+	};
+} __attribute__ ((__may_alias__));
+WRITE_CLASS_ENCODER(ceph_mds_request_head);
+
 
 // file modes
 
