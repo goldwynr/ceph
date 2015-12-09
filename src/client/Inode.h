@@ -318,7 +318,6 @@ struct Inode {
       async_err(0)
   {
     memset(&dir_layout, 0, sizeof(dir_layout));
-    memset(&layout, 0, sizeof(layout));
     memset(&quota, 0, sizeof(quota));
   }
   ~Inode() { }

@@ -157,7 +157,6 @@ struct C_InvalidateCache : public Context {
       snap_name = snap;
 
     memset(&header, 0, sizeof(header));
-    memset(&layout, 0, sizeof(layout));
 
     ThreadPoolSingleton *thread_pool_singleton;
     cct->lookup_or_create_singleton_object<ThreadPoolSingleton>(
@@ -318,7 +317,6 @@ struct C_InvalidateCache : public Context {
     alignments.push_back(stripe_unit); // stripe unit
     readahead.set_alignments(alignments);
 
-    memset(&layout, 0, sizeof(layout));
     layout.fl_stripe_unit = stripe_unit;
     layout.fl_stripe_count = stripe_count;
     layout.fl_object_size = 1ull << order;
