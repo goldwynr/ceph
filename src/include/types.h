@@ -425,6 +425,8 @@ namespace std {
 } // namespace std
 
 
+struct ceph_file_layout file_layout_legacy(const file_layout_t& fl);
+
 // file modes
 
 static inline bool file_mode_is_readonly(int mode) {
