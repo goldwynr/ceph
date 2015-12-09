@@ -49,7 +49,7 @@ class RecoveryDriver {
         const inode_backtrace_t &bt,
         uint64_t size,
         time_t mtime,
-        const ceph_file_layout &layout) = 0;
+        const file_layout_t &layout) = 0;
 
     /**
      * Inject an inode + dentry into the lost+found directory,
@@ -59,7 +59,7 @@ class RecoveryDriver {
         inodeno_t ino,
         uint64_t size,
         time_t mtime,
-        const ceph_file_layout &layout) = 0;
+        const file_layout_t &layout) = 0;
 
     /**
      * Create any missing roots (i.e. mydir, strays, root inode)
@@ -122,13 +122,13 @@ class LocalFileDriver : public RecoveryDriver
         const inode_backtrace_t &bt,
         uint64_t size,
         time_t mtime,
-        ceph_file_layout const &layout);
+        file_layout_t const &layout);
 
     int inject_lost_and_found(
         inodeno_t ino,
         uint64_t size,
         time_t mtime,
-        ceph_file_layout const &layout);
+        file_layout_t const &layout);
 
     int init_roots(int64_t data_pool_id);
 
@@ -195,13 +195,13 @@ class MetadataDriver : public RecoveryDriver
         const inode_backtrace_t &bt,
         uint64_t size,
         time_t mtime,
-        ceph_file_layout const &layout);
+        file_layout_t const &layout);
 
     int inject_lost_and_found(
         inodeno_t ino,
         uint64_t size,
         time_t mtime,
-        ceph_file_layout const &layout);
+        file_layout_t const &layout);
 
     int init_roots(int64_t data_pool_id);
 

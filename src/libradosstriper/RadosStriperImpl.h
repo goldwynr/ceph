@@ -219,14 +219,14 @@ struct libradosstriper::RadosStriperImpl {
 
   // internal versions of IO method
   int write_in_open_object(const std::string& soid,
-			   const ceph_file_layout& layout,
+			   const file_layout_t& layout,
 			   const std::string& lockCookie,
 			   const bufferlist& bl,
 			   size_t len,
 			   uint64_t off);
   int aio_write_in_open_object(const std::string& soid,
 			       librados::AioCompletionImpl *c,
-			       const ceph_file_layout& layout,
+			       const file_layout_t& layout,
 			       const std::string& lockCookie,
 			       const bufferlist& bl,
 			       size_t len,
@@ -236,18 +236,18 @@ struct libradosstriper::RadosStriperImpl {
 			 const bufferlist& bl,
 			 size_t len,
 			 uint64_t off,
-			 const ceph_file_layout& layout);
+			 const file_layout_t& layout);
 
   int extract_uint32_attr(std::map<std::string, bufferlist> &attrs,
 			  const std::string& key,
-			  ceph_le32 *value);
+			  uint32_t *value);
 
   int extract_sizet_attr(std::map<std::string, bufferlist> &attrs,
 			 const std::string& key,
 			 size_t *value);
 
   int internal_get_layout_and_size(const std::string& oid,
-				   ceph_file_layout *layout,
+				   file_layout_t *layout,
 				   uint64_t *size);
 
   /**
@@ -257,7 +257,7 @@ struct libradosstriper::RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int openStripedObjectForRead(const std::string& soid,
-			       ceph_file_layout *layout,
+			       file_layout_t *layout,
 			       uint64_t *size,
 			       std::string *lockCookie);
 
@@ -275,7 +275,7 @@ struct libradosstriper::RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int openStripedObjectForWrite(const std::string& soid,
-				ceph_file_layout *layout,
+				file_layout_t *layout,
 				uint64_t *size,
 				std::string *lockCookie,
 				bool isFileSizeAbsolute);
@@ -290,7 +290,7 @@ struct libradosstriper::RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int createAndOpenStripedObject(const std::string& soid,
-				 ceph_file_layout *layout,
+				 file_layout_t *layout,
 				 uint64_t size,
 				 std::string *lockCookie,
 				 bool isFileSizeAbsolute);
@@ -301,7 +301,7 @@ struct libradosstriper::RadosStriperImpl {
   int truncate(const std::string& soid,
 	       uint64_t original_size,
 	       uint64_t size,
-	       ceph_file_layout &layout);
+	       file_layout_t &layout);
 
   /**
    * grows an object (adding 0s). Should only be called with size > original_size
@@ -309,7 +309,7 @@ struct libradosstriper::RadosStriperImpl {
   int grow(const std::string& soid,
 	   uint64_t original_size,
 	   uint64_t size,
-	   ceph_file_layout &layout);
+	   file_layout_t &layout);
   
   /**
    * creates a unique identifier
@@ -332,7 +332,7 @@ struct libradosstriper::RadosStriperImpl {
   librados::IoCtxImpl *m_ioCtxImpl;
 
   // Default layout
-  ceph_file_layout m_layout;
+  file_layout_t m_layout;
 };
 
 #endif

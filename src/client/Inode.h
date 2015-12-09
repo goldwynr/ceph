@@ -176,7 +176,7 @@ struct Inode {
 
   // file (data access)
   ceph_dir_layout dir_layout;
-  ceph_file_layout layout;
+  file_layout_t layout;
   uint64_t   size;        // on directory, # dentries
   uint32_t   truncate_seq;
   uint64_t   truncate_size;
@@ -297,7 +297,7 @@ struct Inode {
 
   xlist<MetaRequest*> unsafe_dir_ops;
 
-  Inode(Client *c, vinodeno_t vino, ceph_file_layout *newlayout)
+  Inode(Client *c, vinodeno_t vino, file_layout_t *newlayout)
     : client(c), ino(vino.ino), snapid(vino.snapid), faked_ino(0),
       rdev(0), mode(0), uid(0), gid(0), nlink(0),
       size(0), truncate_seq(1), truncate_size(-1),

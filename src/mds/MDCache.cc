@@ -100,7 +100,7 @@
 
 using namespace std;
 
-extern struct ceph_file_layout g_default_file_layout;
+extern struct file_layout_t g_default_file_layout;
 
 #include "common/config.h"
 #include "include/assert.h"
@@ -327,17 +327,17 @@ void MDCache::remove_inode(CInode *o)
   delete o; 
 }
 
-ceph_file_layout MDCache::gen_default_file_layout(const MDSMap &mdsmap)
+file_layout_t MDCache::gen_default_file_layout(const MDSMap &mdsmap)
 {
-  ceph_file_layout result = g_default_file_layout;
+  file_layout_t result = g_default_file_layout;
   result.fl_pg_pool = mdsmap.get_first_data_pool();
 
   return result;
 }
 
-ceph_file_layout MDCache::gen_default_log_layout(const MDSMap &mdsmap)
+file_layout_t MDCache::gen_default_log_layout(const MDSMap &mdsmap)
 {
-  ceph_file_layout result = g_default_file_layout;
+  file_layout_t result = g_default_file_layout;
   result.fl_pg_pool = mdsmap.get_metadata_pool();
   if (g_conf->mds_log_segment_size > 0) {
     result.fl_object_size = g_conf->mds_log_segment_size;

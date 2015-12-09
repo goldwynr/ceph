@@ -42,7 +42,7 @@ void Journaler::set_writeable()
   readonly = false;
 }
 
-void Journaler::create(ceph_file_layout *l, stream_format_t const sf)
+void Journaler::create(file_layout_t *l, stream_format_t const sf)
 {
   Mutex::Locker lk(lock);
 
@@ -61,13 +61,13 @@ void Journaler::create(ceph_file_layout *l, stream_format_t const sf)
     << ", format=" << stream_format << dendl;
 }
 
-void Journaler::set_layout(ceph_file_layout const *l)
+void Journaler::set_layout(file_layout_t const *l)
 {
     Mutex::Locker lk(lock);
     _set_layout(l);
 }
 
-void Journaler::_set_layout(ceph_file_layout const *l)
+void Journaler::_set_layout(file_layout_t const *l)
 {
   layout = *l;
 

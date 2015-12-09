@@ -492,7 +492,7 @@ int DataScan::scan_inodes()
 
     AccumulateResult accum_res;
     inode_backtrace_t backtrace;
-    ceph_file_layout loaded_layout = g_default_file_layout;
+    file_layout_t loaded_layout = g_default_file_layout;
     int r = ClsCephFSClient::fetch_inode_accumulate_result(
         data_io, oid, &backtrace, &loaded_layout, &accum_res);
     
@@ -513,7 +513,7 @@ int DataScan::scan_inodes()
 
     // This is the layout we will use for injection, populated either
     // from loaded_layout or from best guesses
-    ceph_file_layout guessed_layout;
+    file_layout_t guessed_layout;
     guessed_layout.fl_pg_pool = data_pool_id;
 
     // Calculate file_size, guess chunk_size
@@ -750,7 +750,7 @@ int MetadataDriver::read_dentry(inodeno_t parent_ino, frag_t frag,
 }
 
 int MetadataDriver::inject_lost_and_found(inodeno_t ino, uint64_t file_size,
-    time_t file_mtime, const ceph_file_layout &layout)
+    time_t file_mtime, const file_layout_t &layout)
 {
   // Create lost+found if doesn't exist
   bool created = false;
@@ -933,7 +933,7 @@ int MetadataDriver::get_frag_of(
 
 int MetadataDriver::inject_with_backtrace(
     const inode_backtrace_t &backtrace, uint64_t file_size, time_t file_mtime,
-    const ceph_file_layout &layout)
+    const file_layout_t &layout)
     
 {
 
@@ -1289,7 +1289,7 @@ int LocalFileDriver::inject_with_backtrace(
     const inode_backtrace_t &bt,
     uint64_t size,
     time_t mtime,
-    const ceph_file_layout &layout)
+    const file_layout_t &layout)
 {
   std::string path_builder = path;
 
@@ -1325,7 +1325,7 @@ int LocalFileDriver::inject_lost_and_found(
     inodeno_t ino,
     uint64_t size,
     time_t mtime,
-    const ceph_file_layout &layout)
+    const file_layout_t &layout)
 {
   std::string lf_path = path + "/lost+found";
   int r = mkdir(lf_path.c_str(), 0755);

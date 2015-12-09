@@ -3043,7 +3043,7 @@ void Client::send_cap(Inode *in, MetaSession *session, Cap *cap,
     m->head.xattr_version = in->xattr_version;
   }
   
-  m->head.layout = in->layout;
+  m->head.layout = file_layout_legacy(in->layout);
   m->head.size = in->size;
   m->head.max_size = in->max_size;
   m->head.truncate_seq = in->truncate_seq;
@@ -10237,14 +10237,14 @@ uint64_t Client::ll_snap_seq(Inode *in)
   return in->snaprealm->seq;
 }
 
-int Client::ll_file_layout(Inode *in, ceph_file_layout *layout)
+int Client::ll_file_layout(Inode *in, file_layout_t *layout)
 {
   Mutex::Locker lock(client_lock);
   *layout = in->layout;
   return 0;
 }
 
-int Client::ll_file_layout(Fh *fh, ceph_file_layout *layout)
+int Client::ll_file_layout(Fh *fh, file_layout_t *layout)
 {
   return ll_file_layout(fh->inode.get(), layout);
 }
@@ -10257,7 +10257,7 @@ int Client::ll_file_layout(Fh *fh, ceph_file_layout *layout)
    tractable and works for demonstration purposes. */
 
 int Client::ll_get_stripe_osd(Inode *in, uint64_t blockno,
-			      ceph_file_layout* layout)
+			      file_layout_t* layout)
 {
   Mutex::Locker lock(client_lock);
   inodeno_t ino = ll_get_inodeno(in);
@@ -10273,7 +10273,7 @@ int Client::ll_get_stripe_osd(Inode *in, uint64_t blockno,
 
   object_t oid = file_object_t(ino, objectno);
   const OSDMap *osdmap = objecter->get_osdmap_read();
-  ceph_object_layout olayout = osdmap->file_to_object_layout(oid, *layout, "");
+  ceph_object_layout olayout = osdmap->file_to_object_layout(oid, *layout);
   objecter->put_osdmap_read();
 
   pg_t pg = (pg_t)olayout.ol_pgid;
@@ -10288,7 +10288,7 @@ int Client::ll_get_stripe_osd(Inode *in, uint64_t blockno,
 uint64_t Client::ll_get_internal_offset(Inode *in, uint64_t blockno)
 {
   Mutex::Locker lock(client_lock);
-  ceph_file_layout *layout=&(in->layout);
+  file_layout_t *layout=&(in->layout);
   uint32_t object_size = layout->fl_object_size;
   uint32_t su = layout->fl_stripe_unit;
   uint64_t stripes_per_object = object_size / su;
@@ -10476,7 +10476,7 @@ int Client::ll_read_block(Inode *in, uint64_t blockid,
 			  char *buf,
 			  uint64_t offset,
 			  uint64_t length,
-			  ceph_file_layout* layout)
+			  file_layout_t* layout)
 {
   Mutex::Locker lock(client_lock);
   Mutex flock("Client::ll_read_block flock");
@@ -10513,7 +10513,7 @@ int Client::ll_read_block(Inode *in, uint64_t blockid,
 
 int Client::ll_write_block(Inode *in, uint64_t blockid,
 			   char* buf, uint64_t offset,
-			   uint64_t length, ceph_file_layout* layout,
+			   uint64_t length, file_layout_t* layout,
 			   uint64_t snapseq, uint32_t sync)
 {
   Mutex flock("Client::ll_write_block flock");
@@ -10890,7 +10890,7 @@ void Client::ll_interrupt(void *d)
 
 // expose file layouts
 
-int Client::describe_layout(const char *relpath, ceph_file_layout *lp)
+int Client::describe_layout(const char *relpath, file_layout_t *lp)
 {
   Mutex::Locker lock(client_lock);
 
@@ -10906,7 +10906,7 @@ int Client::describe_layout(const char *relpath, ceph_file_layout *lp)
   return 0;
 }
 
-int Client::fdescribe_layout(int fd, ceph_file_layout *lp)
+int Client::fdescribe_layout(int fd, file_layout_t *lp)
 {
   Mutex::Locker lock(client_lock);
 

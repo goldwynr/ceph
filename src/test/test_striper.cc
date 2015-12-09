@@ -8,7 +8,7 @@
 
 TEST(Striper, Stripe1)
 {
-  ceph_file_layout l;
+  file_layout_t l;
   memset(&l, 0, sizeof(l));
 
   l.fl_object_size = 262144;
@@ -28,7 +28,7 @@ TEST(Striper, Stripe1)
 
 TEST(Striper, EmptyPartialResult)
 {
-  ceph_file_layout l;
+  file_layout_t l;
   memset(&l, 0, sizeof(l));
 
   l.fl_object_size = 4194304;
@@ -59,7 +59,7 @@ TEST(Striper, EmptyPartialResult)
 
 TEST(Striper, GetNumObj)
 {
-  ceph_file_layout l;
+  file_layout_t l;
   memset(&l, 0, sizeof(l));
 
   l.fl_object_size = 262144;
