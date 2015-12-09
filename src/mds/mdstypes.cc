@@ -20,6 +20,16 @@ void dump(const ceph_file_layout& l, Formatter *f)
     f->dump_unsigned("pg_pool", l.fl_pg_pool);
 }
 
+void dump(const file_layout_t& l, Formatter *f)
+{
+  f->dump_unsigned("stripe_unit", l.fl_stripe_unit);
+  f->dump_unsigned("stripe_count", l.fl_stripe_count);
+  f->dump_unsigned("object_size", l.fl_object_size);
+  if (l.fl_pg_pool)
+    f->dump_unsigned("pg_pool", l.fl_pg_pool);
+  f->dump_string("namespace", l.fl_namespace);
+}
+
 void dump(const ceph_dir_layout& l, Formatter *f)
 {
   f->dump_unsigned("dir_hash", l.dl_dir_hash);
