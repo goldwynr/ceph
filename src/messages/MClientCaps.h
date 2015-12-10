@@ -58,7 +58,7 @@ class MClientCaps : public Message {
   utime_t get_atime() { return utime_t(head.atime); }
   __u32 get_time_warp_seq() { return head.time_warp_seq; }
 
-  ceph_file_layout& get_layout() { return head.layout; }
+  file_layout_t& get_layout() { return head.layout; }
 
   int       get_migrate_seq() { return head.migrate_seq; }
   int       get_op() { return head.op; }
@@ -113,7 +113,6 @@ class MClientCaps : public Message {
       osd_epoch_barrier(oeb),
       oldest_flush_tid(0),
       caller_uid(0), caller_gid(0) {
-    memset(&head, 0, sizeof(head));
     head.op = op;
     head.ino = ino;
     head.realm = realm;
@@ -133,7 +132,6 @@ class MClientCaps : public Message {
       osd_epoch_barrier(oeb),
       oldest_flush_tid(0),
       caller_uid(0), caller_gid(0) {
-    memset(&head, 0, sizeof(head));
     head.op = op;
     head.ino = ino;
     head.realm = realm;

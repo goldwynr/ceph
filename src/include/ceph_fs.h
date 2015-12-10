@@ -647,44 +647,6 @@ struct ceph_mds_cap_peer {
 	__u8   flags;
 } __attribute__ ((packed));
 
-/*
- * caps message, used for capability callbacks, acks, requests, etc.
- */
-struct ceph_mds_caps {
-	__le32 op;                  /* CEPH_CAP_OP_* */
-	__le64 ino, realm;
-	__le64 cap_id;
-	__le32 seq, issue_seq;
-	__le32 caps, wanted, dirty; /* latest issued/wanted/dirty */
-	__le32 migrate_seq;
-	__le64 snap_follows;
-	__le32 snap_trace_len;
-
-	/* authlock */
-	__le32 uid, gid, mode;
-
-	/* linklock */
-	__le32 nlink;
-
-	/* xattrlock */
-	__le32 xattr_len;
-	__le64 xattr_version;
-
-	union {
-		/* all except export */
-		struct {
-			/* filelock */
-			__le64 size, max_size, truncate_size;
-			__le32 truncate_seq;
-			struct ceph_timespec mtime, atime, ctime;
-			struct ceph_file_layout layout;
-			__le32 time_warp_seq;
-		};
-		/* export message */
-		struct ceph_mds_cap_peer peer;
-	};
-} __attribute__ ((packed));
-
 /* cap release msg head */
 struct ceph_mds_cap_release {
 	__le32 num;                /* number of cap_items that follow */
