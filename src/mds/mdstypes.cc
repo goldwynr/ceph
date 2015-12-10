@@ -266,7 +266,7 @@ void inline_data_t::decode(bufferlist::iterator &p)
  */
 void inode_t::encode(bufferlist &bl) const
 {
-  ENCODE_START(13, 6, bl);
+  ENCODE_START(14, 6, bl);
 
   ::encode(ino, bl);
   ::encode(rdev, bl);
@@ -338,7 +338,13 @@ void inode_t::decode(bufferlist::iterator &p)
     ::decode(dir_layout, p);
   else
     memset(&dir_layout, 0, sizeof(dir_layout));
-  ::decode(layout, p);
+  if (struct_v >= 14)
+	  ::decode(layout, p);
+  else {
+	ceph_file_layout l;
+	::decode(l, p);
+	layout = l;
+  }
   ::decode(size, p);
   ::decode(truncate_seq, p);
   ::decode(truncate_size, p);

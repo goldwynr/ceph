@@ -504,17 +504,15 @@ struct inode_t {
     truncate_pending++;
   }
 
-  bool has_layout() const {
-    // why on earth is there no converse of memchr() in string.h?
-    const char *p = (const char *)&layout;
-    for (size_t i = 0; i < sizeof(layout); i++)
-      if (p[i] != '\0')
-	return true;
-    return false;
+  void clear_layout() {
+	  layout = file_layout_t();
   }
 
-  void clear_layout() {
-    layout = file_layout_t();
+  bool has_layout() const {
+	  /* XXX This assumes if it is read, then stripe_unit is
+	   * greater than zero. There should be a better method.
+	   */
+	  return (layout.fl_stripe_unit > 0);
   }
 
   uint64_t get_layout_size_increment() {
